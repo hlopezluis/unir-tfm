@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Diagnósticos</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="text-center">
+      Carga de datos
+    </h1>
+    <h2>Nuevo fichero</h2>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="input-group">
+          <label class="input-group-btn">
+            <span class="btn btn-primary">
+              Seleccionar archivo <input type="file" id="fileInput" style="display: none;" onchange="document.getElementById('fileName').value = this.files[0]?.name || 'Ningún archivo seleccionado';">
+            </span>
+          </label>
+          <input type="text" class="form-control" id="fileName" readonly value="Ningún archivo seleccionado">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <button onclick="uploadFile('tfm-store')" class="btn btn-danger btn-block">
+            <i class="glyphicon glyphicon-upload"></i> Cargar fichero
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <h2>Histórico</h2>
+    <table id="fileTable" class="table table-striped">
+      <thead>
+        <th>Nombre del fichero</th>
+        <th>Tamaño (en Bytes)</th>
+        <th>Fecha de la carga</th>
+        <th></th>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="https://sdk.amazonaws.com/js/aws-sdk-2.932.0.min.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>

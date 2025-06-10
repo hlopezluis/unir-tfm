@@ -1,0 +1,11 @@
+{
+  "liveServer.settings.port": 5501,
+  "liveServer.settings.root": "/",
+  "liveServer.settings.CustomBrowser": "chrome",
+  "liveServer.settings.https": {
+    "enable": false,
+    "cert": "/Users/lopezh1/Documents/UNIR/TFM/unir-tfm/sources/html/https/localhost.pem",
+    "key": "/Users/lopezh1/Documents/UNIR/TFM/unir-tfm/sources/html/https/localhost.key",
+    "passphrase": "Neptuno76$"
+  }
+}

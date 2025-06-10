@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Diagnósticos</title>
+</head>
+<body>
+  <h1>Resultados del endpoint</h1>
+  <ul id="diagnostics-list"></ul>
+
+  <iframe title="hv_20250521" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=b0cb3fe7-1ae5-448d-8cd6-b030c379e9bd&autoAuth=true&ctid=899789dc-202f-44b4-8472-a6d40f9eb440" frameborder="0" allowFullScreen="true"></iframe>
+
+  <script>
+    fetch('https://61tulzpmyk.execute-api.eu-west-3.amazonaws.com/dev')
+      .then(response => response.json())
+      .then(data => {
+        try {
+          // Reemplazar NaN por null para que sea JSON válido
+          const cleaned = data.body.replace(/NaN/g, 'null');
+          const parsedBody = JSON.parse(cleaned);
+
+          const list = document.getElementById('diagnostics-list');
+
+          parsedBody.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `Registro: ${item.numRegistro}, Edad: ${item.edad}, Sexo: ${item.sexo.nombre}, País: ${item.paisNacimiento.nombre}`;
+            list.appendChild(li);
+          });
+        } catch (e) {
+          console.error('Error al parsear JSON:', e);
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener los datos:', error);
+      });
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 1. Crear Lambda function\
+2. En el desktop, crear una carpeta, donde teng\'e1moste el fichero oon el c\'f3digo de la lambda function (python en nuestro caso), que a su vez contenga otra carpeta dependencies, que es donde vamos a meter las dependencias de MongoDB.\
+3. Desde la terminal: \
+	- pip install \'97target ./dependencies pymongo\
+4. A\'f1adir el c\'f3digo python.\
+5. En la terminal:\
+	- cd dependencies\
+	- zip -r ../deployment.zip\
+	- zip -r ../deployment.zip .\
+	- cd ..\
+	- zip deployment.zip lambda_function.py\
+6. Upload file desde AWS console a la lambda\
+7. Para Pandas y Numpy a\'f1adir una capa de AWS que ya contenga esos paquetes.\
+\
+REF: https://www.youtube.com/watch?v=-ZSKyLspT3Q&t=749s\
+	}
