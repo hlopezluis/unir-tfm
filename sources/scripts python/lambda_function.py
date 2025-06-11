@@ -74,6 +74,7 @@ def lambda_handler(event, context):
         df['raza'] = df['paisNacimiento'].map(raza_por_codigo)
         df['raza'] = df['raza'].fillna('no identificada')
 
+        # Comunidad autónoma
         comunidades_autonoma = {
             'Andalucía': 1,
             'Aragón': 2,
@@ -101,13 +102,7 @@ def lambda_handler(event, context):
         df['comunidadAutonomaNombre'] = df['comunidadAutonoma'].map(codigo_a_comunidad)
         df['comunidadAutonomaCodigo'] = df['comunidadAutonoma'].astype(str).str.zfill(2)
 
-        df['comunidadAutonoma'] = df.apply(
-            lambda row: {'codigo': row['comunidadAutonomaCodigo'], 'nombre': row['comunidadAutonomaNombre']},
-            axis=1
-        )
-
-        df.drop(['comunidadAutonomaCodigo', 'comunidadAutonomaNombre'], axis=1, inplace=True)
-
+        # Países
         paises = {
             "no identificado": 0,
             "Afganistán": 4,
@@ -310,13 +305,7 @@ def lambda_handler(event, context):
         df['paisNacimientoNombre'] = df['paisNacimiento'].astype(int).map(codigo_a_paises)
         df['paisNacimientoCodigo'] = df['paisNacimiento'].astype(int)
 
-        df['paisNacimiento'] = df.apply(
-            lambda row: {'codigo': row['paisNacimientoCodigo'], 'nombre': row['paisNacimientoNombre']},
-            axis=1
-        )
-
-        df.drop(['paisNacimientoCodigo', 'paisNacimientoNombre'], axis=1, inplace=True)
-        
+        # Alta
         tipo_altas = {
             "Domicilio": 1,
             "Traslado a otro Hospital": 2,
@@ -332,11 +321,7 @@ def lambda_handler(event, context):
         df['tipoAltaNombre'] = df['tipoAlta'].astype(int).map(codigo_a_tipo_altas)
         df['tipoAltaCodigo'] = df['tipoAlta'].astype(int)
 
-        df['tipoAlta'] = df.apply(
-            lambda row: {'codigo': row['tipoAltaCodigo'], 'nombre': row['tipoAltaNombre']},
-            axis=1
-        )
-        
+        # Sexo
         sexos = {
             "Varón": 1,
             "Mujer": 2,
@@ -348,11 +333,7 @@ def lambda_handler(event, context):
         df['sexoNombre'] = df['sexo'].astype(int).map(codigo_a_sexos)
         df['sexoCodigo'] = df['sexo'].astype(int)
 
-        df['sexo'] = df.apply(
-            lambda row: {'codigo': row['sexoCodigo'], 'nombre': row['sexoNombre']},
-            axis=1
-        )
-
+        # Entradas y Salidas
         columnas_diagnostico = [
             'Diagnóstico 2', 'Diagnóstico 3', 'Diagnóstico 4', 'Diagnóstico 5',
             'Diagnóstico 6', 'Diagnóstico 7', 'Diagnóstico 8', 'Diagnóstico 9',
@@ -445,7 +426,7 @@ def lambda_handler(event, context):
 
         columnas_condiciones_salidas = [
             'aborto', 'muerteFetal', 'rnMuerto', 'muerteTardia', 'rnVivo', 'rn', 'preclampsia', 'preclampsiaPrecoz',
-            'preclampsiaGrave', 'preclampsiaGrave precoz', 'preclampsiaGrave tardía', 'eclampsia', 'helpp', 'ictusPe',
+            'preclampsiaGrave', 'preclampsiaGravePrecoz', 'preclampsiaGraveTardia', 'eclampsia', 'helpp', 'ictusPe',
             'ictusHemorragicoPe', 'ictusIsquemicoPe', 'peCriteriosGravedad', 'ppp', 'sufrimientoFetal', 'cirBajoPeso',
             'cesarea', 'roturaPrematuraMembranas', 'abruptioPlacentae', 'peAdverseFetal', 'hemorragiaFaseTempranaEmbarazo',
             'hemorragiaPartoAntepartoPosparto', 'instrumental', 'trombosisEmbarazoPuerperio', 'trombosisPuerperio',
@@ -469,8 +450,8 @@ def lambda_handler(event, context):
             'preclampsia': ['O11', 'O14', 'O15'],
             'preclampsiaPrecoz': ['O11.1', 'O11.2', 'O14.02', 'O14.12', 'O14.22', 'O14.92'],
             'preclampsiaGrave': ['O14.1'],
-            'preclampsiaGrave precoz': ['O14.12'],
-            'preclampsiaGrave tardía': ['O14.13'],
+            'preclampsiaGravePrecoz': ['O14.12'],
+            'preclampsiaGraveTardia': ['O14.13'],
             'eclampsia': ['O15'],
             'helpp': ['O14.2'],
             'ictusPe': ['I60', 'I61', 'I63'],
@@ -517,56 +498,32 @@ def lambda_handler(event, context):
             # Combinar resultados con el DataFrame original
             return pd.concat([df, resultados], axis=1)
 
-        ##################
-        # Crear entradas #
-        ##################
-
+        # Crear columnas 'entrada'
         df = crear_columnas(condiciones_entradas, columnas_diagnostico, df)
 
-        df['entradas'] = df.apply(
-            lambda row: {cond: bool(row[cond]) for cond in columnas_condiciones_entradas if cond in row},
-            axis=1
-        )
-
-        ##################
-        # Crear salidas  #
-        ##################
-
+        # Crear columnas 'salidas'
         df = crear_columnas(condiciones_salidas_procedimiento, columnas_procedimiento, df)
-
-        df['salidas'] = df.apply(
-            lambda row: {cond: bool(row[cond]) for cond in columnas_condiciones_salidas if cond in row},
-            axis=1
-        )
-
         df = crear_columnas(condiciones_salidas_diagnostico, columnas_diagnostico, df)
+        
+        # Exitus
+        df['exitus'] = (df['tipoAltaCodigo'] == 4).astype(int)
 
-        df['salidas'] = df.apply(
-            lambda row: {cond: bool(row[cond]) for cond in columnas_condiciones_salidas if cond in row},
-            axis=1
-        )
-
-        def actualizar_salidas(row):
-            salidas = row['salidas']
-            tipoAlta = row['tipoAlta']
-            if isinstance(salidas, dict):
-                peAdverseMaternal = (
-                    #row['exitus'] == 1 or
-                    tipoAlta.get('codigo', 0) == 1 or
-                    row['ingresoUCI'] == True or
-                    salidas.get('ictusPe', 0) == True
-                )
-                salidas['peAdverseMaternal'] = bool(peAdverseMaternal)
-            return salidas
-
-        df['salidas'] = df.apply(actualizar_salidas, axis=1)
+        # PE Adverse Maternal
+        df['peAdverseMaternal'] = (
+            (df['exitus'] == 1) | 
+            (df['ingresoUCI'] == 1) | 
+            (df['ictusPe'] == 1)
+        ).astype(int)
 
         # Crear un dataframe final con las columnas que nos interesan
-        columnas = ['numRegistro', 'edad', 'sexo', 'raza', 'paisNacimiento', 'comunidadAutonoma', 'tipoAlta',
-                    'estanciaDias', 'ingresoUCI', 'diasUCI', 'entradas', 'salidas']
+        columnas_iniciales = ['numRegistro', 'edad', 'sexoCodigo', 'sexoNombre', 'raza', 
+                            'paisNacimientoCodigo', 'paisNacimientoNombre', 'comunidadAutonomaCodigo', 'comunidadAutonomaNombre', 
+                            'tipoAltaCodigo', 'tipoAltaNombre', 'exitus', 'estanciaDias', 'ingresoUCI', 'diasUCI']
+
+        columnas = columnas_iniciales + columnas_condiciones_entradas + columnas_condiciones_salidas + ['peAdverseMaternal']
 
         df_final= df[columnas]
-        
+
         #print(df.columns.tolist())
         
         #print(df.head())
