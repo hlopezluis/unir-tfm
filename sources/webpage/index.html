@@ -2,37 +2,65 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Lista de Diagnósticos</title>
+  <title>Listado Paginado</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5s/bootstrap.min.css
 </head>
-<body>
-  <h1>Resultados del endpoint</h1>
-  <ul id="diagnostics-list"></ul>
+<body class="container mt-4">
 
-  <iframe title="hv_20250521" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=b0cb3fe7-1ae5-448d-8cd6-b030c379e9bd&autoAuth=true&ctid=899789dc-202f-44b4-8472-a6d40f9eb440" frameborder="0" allowFullScreen="true"></iframe>
+  <h2>Listado de Documentos</h2>
+  <ul id="document-list" class="list-group mb-3"></ul>
+
+  <nav>
+    <ul class="pagination" id="pagination"></ul>
+  </nav>
 
   <script>
-    fetch('https://61tulzpmyk.execute-api.eu-west-3.amazonaws.com/dev')
-      .then(response => response.json())
-      .then(data => {
-        try {
-          // Reemplazar NaN por null para que sea JSON válido
-          const cleaned = data.body.replace(/NaN/g, 'null');
-          const parsedBody = JSON.parse(cleaned);
+    const pageSize = 10;
+    let currentPage = 1;
+    let totalPages = 1;
 
-          const list = document.getElementById('diagnostics-list');
+    async function fetchData(page) {
+      const response = await fetch(`https://61yfnkfn3i.execute-api.eu-west-3.amazonaws.com/diagnostics?page=${page}&pageSize=${pageSize}`);
+      const result = await response.json();
 
-          parsedBody.forEach(item => {
-            const li = document.createElement('li');
-            li.textContent = `Registro: ${item.numRegistro}, Edad: ${item.edad}, Sexo: ${item.sexo.nombre}, País: ${item.paisNacimiento.nombre}`;
-            list.appendChild(li);
-          });
-        } catch (e) {
-          console.error('Error al parsear JSON:', e);
-        }
-      })
-      .catch(error => {
-        console.error('Error al obtener los datos:', error);
+      console.log(result);
+
+      renderList(result.data);
+      renderPagination(result.total);
+    }
+
+    function renderList(data) {
+      const list = document.getElementById('document-list');
+      list.innerHTML = '';
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = JSON.stringify(item);
+        list.appendChild(li);
       });
+    }
+
+    function renderPagination(totalItems) {
+      totalPages = Math.ceil(totalItems / pageSize);
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        li.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentPage = i;
+          fetchData(currentPage);
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    // Inicial
+    fetchData(currentPage);
   </script>
+
 </body>
 </html>
