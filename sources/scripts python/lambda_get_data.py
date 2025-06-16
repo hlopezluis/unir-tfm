@@ -14,15 +14,24 @@ def lambda_handler(event, context):
         pageSize = int(query_params.get('pageSize', 10))
         skip = (page - 1) * pageSize
 
+        params = query_params.get('params')
+
+        mongo_query = {}
+
+        if params:
+            values = params.split(',')
+            mongo_query = {value: 1 for value in values}
+            print(mongo_query)
+
         client = MongoClient(host=os.environ.get("ATLAS_URI"))
 
         db = client.tfm
         collection = db.raecmbd
 
-        total = collection.count_documents({})
+        total = collection.count_documents(mongo_query)
 
         documents = list(
-            collection.find({}, {'_id': 0})
+            collection.find(mongo_query, {'_id': 0})
             .skip(skip)
             .limit(pageSize)
         )

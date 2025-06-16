@@ -9,7 +9,16 @@ async function fetchData(page) {
     $('#table-body').empty();
 
     try {
-        const response = await fetch(`https://61yfnkfn3i.execute-api.eu-west-3.amazonaws.com/diagnostics?page=${page}&pageSize=${pageSize}`);            
+        let queryString = generarQueryString();
+        let api = `https://61yfnkfn3i.execute-api.eu-west-3.amazonaws.com/diagnostics?page=${page}&pageSize=${pageSize}`;
+
+        if (queryString != "") {
+            api += "&" + queryString;
+        }
+
+        console.log(api);
+
+        const response = await fetch(api);            
         const text = await response.text();
         const result = JSON.parse(text);
 
@@ -72,15 +81,15 @@ function pageButtons(pages) {
     }
 
     for (var page = maxLeft; page <= maxRight; page++) {
-        wrapper.innerHTML += `<button value=${page} class="page btn btn-sm btn-outline-info">${page}</button>`;
+        wrapper.innerHTML += `<button value=${page} class="page btn btn-sm btn-outline-secondary">${page}</button>`;
     }
 
     if (state.page != 1) {
-        wrapper.innerHTML = `<button value=${1} class="page btn btn-sm btn-info">&#171; First</button>` + wrapper.innerHTML;
+        wrapper.innerHTML = `<button value=${1} class="page btn btn-sm btn-secondary">&#171; Primera</button>` + wrapper.innerHTML;
     }
 
     if (state.page != pages) {
-        wrapper.innerHTML += `<button value=${pages} class="page btn btn-sm btn-info">Last &#187;</button>`;
+        wrapper.innerHTML += `<button value=${pages} class="page btn btn-sm btn-secondary">Última &#187;</button>`;
     }
 
     $('.page').on('click', function () {
@@ -176,7 +185,7 @@ function buildTable() {
                     Muerte tardía: ${item.muerteTardia === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     RN vivo: ${item.rnVivo === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     RN: ${item.rn === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
-                    Preclampsia: ${item.preclampsiaP === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
+                    Preclampsia: ${item.preclampsia === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia precoz: ${item.preclampsiaPrecoz === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia grave: ${item.preclampsiaGrave === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia grave precoz: ${item.preclampsiaGravePrecoz === 1 ? "<b><span style='color: red;'>Sí</span></b>" : "No"}<br>
@@ -199,90 +208,7 @@ function buildTable() {
             </tr>
         `;
         table.append(row);
-    }
-
-    /*
-    Embarazo de alto riesgo
-	Esterilidad previa
-	Historia obstétrica adversa
-	Pérdida previa
-	Aborto previo
-	Muerte fetal previa
-	Multípara
-	Primípara
-	Embarazo TRA
-	Embarazo TRA previo
-	Enfermedad cardiaca hipertensiva
-	Enfermedad renal crónica hipertensiva
-	Enfermedad cardiaca y renal crónica hipertensiva
-	Embarazo múltiple
-	Sobrepeso y obesidad
-	Tabaco
-	Alcohol
-	Dislipemia
-	Neumopatía intersticial (genérica)
-	EAS intersticial (genérica)
-	Hipertensión pulmonar (genérica)
-	ERC (coincide con Charlson)
-	IC (coincide con Charlson)
-	LES
-	Nefritis lúpica
-	LES-pulmón
-	SAF v1
-	SAF v2
-	SAF v3
-	Portador AAF v1
-	Portador AAF v2
-	Esclerosis sistémica
-	SSc-respiratorio
-	<span style='color: red;'>Sí</span>ndrome seco
-	SjS-respiratorio
-	SjS-tubulointersticial
-	EMTC
-	Enfermedad de Behçet
-	Miopatía inflamatoria
-	Vasculitis sistémica
-	Vasculitis ANCA	
-	Sarcoidosis
-	Artritis reumatoide
-	Artropatías enteropáticas
-	Artropatia psoriásica
-    EII
-	Enfermedad glomerular
-	<span style='color: red;'>Sí</span>ndrome de Sjögren primario
-	Antiagregación
-	Aspirina
-	Anticoagulación
-	Esteroides
-	COVID-19
-	Neumonía COVID    
-    Exitus
-    Aborto
-	Muerte fetal
-	RN muerto
-    Muerte tardía
-    RN vivo
-    RN
-    Preclampsia
-	Preclampsia precoz
-	Preclampsia grave
-	Preclampsia grave precoz
-	Preclampsia grave tardía
-	Eclampsia
-	HELPP
-	Ictus en PE
-	Ictus hemorrágico en PE
-	Ictus isquémico en PE
-    PE-criterios de gravedad
-    Parto prematuro-pretérmino (PPP)
-    Sufrimiento fetal
-    CIR-bajo peso
-    Cesárea
-    Rotura prematura de membranas
-    Abruptio placentae
-    PE adverse maternal outcome
-    PE-adverse fetal outcome
-    */
+    }   
 
     pageButtons(data.pages);
 }
@@ -291,4 +217,29 @@ function buildTable() {
 function toggleDetail(row) {
     var detailRow = $(row).next('.detail-row');
     detailRow.toggle();
+}
+
+function search() {
+    state.page = 1;
+    fetchData(state.page);
+}
+
+function generarQueryString() {
+  const checkboxes = document.querySelectorAll('#collapseOne input[type="checkbox"]');
+  const seleccionados = [];
+
+  checkboxes.forEach(checkbox => {
+    if (checkbox.checked) {
+      seleccionados.push(checkbox.id);
+    }
+  });
+
+  const params = new URLSearchParams();
+  if (seleccionados.length > 0) {
+    params.append('params', seleccionados.join(','));
+  }
+
+  const queryString = params.toString();
+  console.log(queryString); // Puedes usarlo para redirigir, enviar por AJAX, etc.
+  return queryString;
 }
