@@ -188,7 +188,7 @@ function buildTable() {
                     Preclampsia: ${item.preclampsia === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia precoz: ${item.preclampsiaPrecoz === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia grave: ${item.preclampsiaGrave === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
-                    Preclampsia grave precoz: ${item.preclampsiaGravePrecoz === 1 ? "<b><span style='color: red;'>Sí</span></b>" : "No"}<br>
+                    Preclampsia grave precoz: ${item.preclampsiaGravePrecoz === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Preclampsia grave tardía: ${item.preclampsiaGraveTardia === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     Eclampsia: ${item.eclampsia === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
                     HELPP: ${item.helpp === 1 ? "<span style='color: red;'>Sí</span>" : "No"}<br>
