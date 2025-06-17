@@ -16,6 +16,11 @@ def lambda_handler(event, context):
         
         print(f"Bucket: {bucket_name}, Key: {object_key}")
 
+        # Conexión a MongoDB
+        client = MongoClient(host=os.environ.get("ATLAS_URI"))
+        db = client["tfm"]
+        collection = db["raecmbd"]
+
         # Obtener el archivo desde S3
         response = s3.get_object(Bucket=bucket_name, Key=object_key)
         content = response['Body'].read().decode('utf-8')
@@ -42,6 +47,22 @@ def lambda_handler(event, context):
         df = df.rename(columns={'Número de registro anual': 'numRegistro', 'Comunidad Autónoma': 'comunidadAutonoma', 'Edad': 'edad', 
                                 'Sexo': 'sexo', 'País Nacimiento': 'paisNacimiento', 'Tipo Alta': 'tipoAlta',
                                 'Ingreso en UCI': 'ingresoUCI', 'Días UCI': 'diasUCI', 'Estancia Días': 'estanciaDias'})
+
+        # Eliminamos los registros cuyo número de registro ya esté en la colección
+        batch_size = 1000
+        filtered_df = pd.DataFrame()
+
+        for i in range(0, len(df), batch_size):
+            batch = df.iloc[i:i+batch_size]
+            existing = collection.find(
+                {"numRegistro": {"$in": batch["numRegistro"].tolist()}},
+                {"numRegistro": 1, "_id": 0}
+            )
+            existing_nums = {doc["numRegistro"] for doc in existing}
+            filtered_batch = batch[~batch["numRegistro"].isin(existing_nums)]
+            filtered_df = pd.concat([filtered_df, filtered_batch])
+
+        df = filtered_df
 
         # Transformamos valores nulos de alguna columna
         df['diasUCI'] = df['diasUCI'].fillna(0)
@@ -524,18 +545,10 @@ def lambda_handler(event, context):
 
         df_final= df[columnas]
 
-        #print(df.columns.tolist())
-        
-        #print(df.head())
-
-        # Conexión a MongoDB
-        client = MongoClient(host=os.environ.get("ATLAS_URI"))
-
-        db = client["tfm"]
-        collection = db["raecmbd"]
-
         # Volcar el DataFrame a MongoDB
         collection.insert_many(df_final.to_dict("records"))
+
+        print(f"Registros insertados: {len(df)}")
 
         return {
             'statusCode': 200,
