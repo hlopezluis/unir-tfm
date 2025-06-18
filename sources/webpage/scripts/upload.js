@@ -47,7 +47,7 @@ function refreshFileList(bucketname) {
 
         var deleteCell = document.createElement("td");
         var deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
+        deleteButton.textContent = "Eliminar";
         deleteButton.addEventListener("click", () => {
           deleteFile(bucketname, object.Key);
         });
