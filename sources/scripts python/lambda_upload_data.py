@@ -51,7 +51,7 @@ def lambda_handler(event, context):
         # Eliminamos los registros cuyo número de registro ya esté en la colección
         batch_size = 1000
         filtered_df = pd.DataFrame()
-
+        
         for i in range(0, len(df), batch_size):
             batch = df.iloc[i:i+batch_size]
             existing = collection.find(
@@ -67,6 +67,19 @@ def lambda_handler(event, context):
         # Transformamos valores nulos de alguna columna
         df['diasUCI'] = df['diasUCI'].fillna(0)
         df['ingresoUCI'] = np.where(df['ingresoUCI'] == 1, True, False)
+
+        # Definir el rango de edad
+        def asignar_rango(edad):
+            if edad < 25:
+                return '< 25'
+            elif 25 <= edad < 35:
+                return '25 - 34'
+            elif 35 <= edad <= 40:
+                return '35 - 40'
+            else:
+                return '> 40'
+
+        df['rango'] = df['edad'].apply(asignar_rango)
 
         # Definir los razas
         razas = {
@@ -537,7 +550,7 @@ def lambda_handler(event, context):
         ).astype(int)
 
         # Crear un dataframe final con las columnas que nos interesan
-        columnas_iniciales = ['numRegistro', 'edad', 'sexoCodigo', 'sexoNombre', 'raza', 
+        columnas_iniciales = ['numRegistro', 'edad', 'rango', 'sexoCodigo', 'sexoNombre', 'raza', 
                             'paisNacimientoCodigo', 'paisNacimientoNombre', 'comunidadAutonomaCodigo', 'comunidadAutonomaNombre', 
                             'tipoAltaCodigo', 'tipoAltaNombre', 'exitus', 'estanciaDias', 'ingresoUCI', 'diasUCI']
 
