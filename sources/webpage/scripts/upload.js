@@ -10,16 +10,16 @@ AWS.config.update({
 var s3 = new AWS.S3();
 
 function formatDate(lastModified) {
-    const date = new Date(lastModified);
-    return date.toLocaleString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    });
+  const date = new Date(lastModified);
+  return date.toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 }
 
 function refreshFileList(bucketname) {
@@ -60,17 +60,30 @@ function refreshFileList(bucketname) {
   });
 }
 
-function deleteFile(bucketname, key) {
-  var params = {
-    Bucket: bucketname,
-    Key: key,
-  };
+let pendingDelete = { bucketname: "", key: "" };
 
-  s3.deleteObject(params, (err, data) => {
-    console.log("File deleted successfully");
-    refreshFileList(bucketname);
-  });
+function deleteFile(bucketname, key) {
+  pendingDelete = { bucketname, key };
+  $("#confirmDeleteModal").modal("show"); // Mostrar modal con jQuery
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+    const { bucketname, key } = pendingDelete;
+    const params = { Bucket: bucketname, Key: key };
+
+    s3.deleteObject(params, (err, data) => {
+      if (err) {
+        console.error("Error al eliminar el archivo:", err);
+      } else {
+        console.log("Archivo eliminado correctamente");
+        refreshFileList(bucketname);
+      }
+    });
+
+    $("#confirmDeleteModal").modal("hide"); // Ocultar modal con jQuery
+  });
+});
 
 function uploadFile(bucketname) {
   let files = document.getElementById("fileInput").files;
