@@ -30,16 +30,9 @@ def lambda_handler(event, context):
 
         # Nos quedamos sólo con las columnas útiles para el proyecto
         columnas_a_conservar = [
-            'Número de registro anual', 'Comunidad Autónoma', 'Edad', 'Sexo', 'País Nacimiento', 'Tipo Alta', 'Ingreso en UCI', 'Días UCI', 
-            'Estancia Días', 'Diagnóstico Principal', 'Diagnóstico 2', 'Diagnóstico 3', 'Diagnóstico 4', 'Diagnóstico 5',
-            'Diagnóstico 6', 'Diagnóstico 7', 'Diagnóstico 8', 'Diagnóstico 9', 'Diagnóstico 10',
-            'Diagnóstico 11', 'Diagnóstico 12', 'Diagnóstico 13', 'Diagnóstico 14', 'Diagnóstico 15',
-            'Diagnóstico 16', 'Diagnóstico 17', 'Diagnóstico 18', 'Diagnóstico 19', 'Diagnóstico 20',
-            'Procedimiento 1', 'Procedimiento 2', 'Procedimiento 3', 'Procedimiento 4', 'Procedimiento 5',
-            'Procedimiento 6', 'Procedimiento 7', 'Procedimiento 8', 'Procedimiento 9', 'Procedimiento 10',
-            'Procedimiento 11', 'Procedimiento 12', 'Procedimiento 13', 'Procedimiento 14', 'Procedimiento 15',
-            'Procedimiento 16', 'Procedimiento 17', 'Procedimiento 18', 'Procedimiento 19', 'Procedimiento 20'
-        ]
+            'Número de registro anual', 'Comunidad Autónoma', 'Edad', 'Sexo', 'País Nacimiento', 'Tipo Alta',
+            'Ingreso en UCI', 'Días UCI', 'Estancia Días'
+        ] + [f'Diagnóstico {i}' for i in range(2, 21)] + [f'Procedimiento {i}' for i in range(1, 21)]
 
         df = df[columnas_a_conservar]
         
@@ -51,7 +44,7 @@ def lambda_handler(event, context):
         # Eliminamos los registros cuyo número de registro ya esté en la colección
         batch_size = 1000
         filtered_df = pd.DataFrame()
-        
+
         for i in range(0, len(df), batch_size):
             batch = df.iloc[i:i+batch_size]
             existing = collection.find(
@@ -368,13 +361,9 @@ def lambda_handler(event, context):
         df['sexoCodigo'] = df['sexo'].astype(int)
 
         # Entradas y Salidas
-        columnas_diagnostico = [
-            'Diagnóstico 2', 'Diagnóstico 3', 'Diagnóstico 4', 'Diagnóstico 5',
-            'Diagnóstico 6', 'Diagnóstico 7', 'Diagnóstico 8', 'Diagnóstico 9',
-            'Diagnóstico 10', 'Diagnóstico 11', 'Diagnóstico 12', 'Diagnóstico 13',
-            'Diagnóstico 14', 'Diagnóstico 15', 'Diagnóstico 16', 'Diagnóstico 17',
-            'Diagnóstico 18', 'Diagnóstico 19', 'Diagnóstico 20'
-        ]
+        columnas_diagnostico = [f'Diagnóstico {i}' for i in range(2, 21)]
+
+        columnas_procedimiento = [f'Procedimiento {i}' for i in range(1, 21)]
 
         columnas_condiciones_entradas = [
             'embarazoAltoRiesgo', 'esterilidadPrevia', 'historiaObstetricaAdversa', 'perdidaPrevia',
@@ -450,13 +439,6 @@ def lambda_handler(event, context):
             'covid19': ['U07.1'],
             'neumoniaCovid': ['J12.82']
         }
-
-        columnas_procedimiento = [
-            'Procedimiento 1', 'Procedimiento 2', 'Procedimiento 3', 'Procedimiento 4', 'Procedimiento 5',
-            'Procedimiento 6', 'Procedimiento 7', 'Procedimiento 8', 'Procedimiento 9', 'Procedimiento 10',
-            'Procedimiento 11', 'Procedimiento 12', 'Procedimiento 13', 'Procedimiento 14', 'Procedimiento 15',
-            'Procedimiento 16', 'Procedimiento 17', 'Procedimiento 18', 'Procedimiento 19', 'Procedimiento 20'
-        ]
 
         columnas_condiciones_salidas = [
             'aborto', 'muerteFetal', 'rnMuerto', 'muerteTardia', 'rnVivo', 'rn', 'preclampsia', 'preclampsiaPrecoz',
@@ -559,7 +541,13 @@ def lambda_handler(event, context):
         df_final= df[columnas]
 
         # Volcar el DataFrame a MongoDB
-        collection.insert_many(df_final.to_dict("records"))
+        def insertar_por_chunks(df, collection, chunk_size=10000):
+            for start in range(0, len(df), chunk_size):
+                end = start + chunk_size
+                collection.insert_many(df.iloc[start:end].to_dict("records"))
+
+        # Insertar
+        insertar_por_chunks(df_final, collection)
 
         print(f"Registros insertados: {len(df)}")
 
