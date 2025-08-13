@@ -31,7 +31,7 @@ def lambda_handler(event, context):
         # Nos quedamos sólo con las columnas útiles para el proyecto
         columnas_a_conservar = [
             'Número de registro anual', 'Comunidad Autónoma', 'Edad', 'Sexo', 'País Nacimiento', 'Tipo Alta',
-            'Ingreso en UCI', 'Días UCI', 'Estancia Días'
+            'Ingreso en UCI', 'Días UCI', 'Estancia Días', 'Diagnóstico Principal', 
         ] + [f'Diagnóstico {i}' for i in range(2, 21)] + [f'Procedimiento {i}' for i in range(1, 21)]
 
         df = df[columnas_a_conservar]
@@ -361,7 +361,7 @@ def lambda_handler(event, context):
         df['sexoCodigo'] = df['sexo'].astype(int)
 
         # Entradas y Salidas
-        columnas_diagnostico = [f'Diagnóstico {i}' for i in range(2, 21)]
+        columnas_diagnostico = [f'Diagnóstico {i}' for i in range(1, 21)]
 
         columnas_procedimiento = [f'Procedimiento {i}' for i in range(1, 21)]
 
@@ -541,6 +541,7 @@ def lambda_handler(event, context):
         df_final= df[columnas]
 
         # Volcar el DataFrame a MongoDB
+        #collection.insert_many(df_final.to_dict("records"))
         def insertar_por_chunks(df, collection, chunk_size=10000):
             for start in range(0, len(df), chunk_size):
                 end = start + chunk_size
