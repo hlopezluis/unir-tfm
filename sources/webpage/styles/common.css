@@ -1,14 +1,18 @@
-html,
 body {
-    height: 100%;
-    margin: 0;
+    margin-bottom: 100px; /* Ajusta según la altura del footer */
 }
 
-body {
+/* Contenedor fijo para paginador y total */
+#pagination-container {
+    position: fixed;
+    bottom: 60px; /* Justo encima del footer */
+    left: 0;
+    width: 100%;
+    background: #fff;
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
     display: flex;
-    flex-direction: column;
-}
-
-.container {
-    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
 }

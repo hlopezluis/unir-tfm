@@ -12,7 +12,7 @@
     <link href="../styles/common.css">
 </head>
 
-<body>
+<body style="display:flex; flex-direction:column; height:100vh; margin:0;">
     <header class="bg-light border-bottom py-3 mb-4">
         <div class="container d-flex flex-wrap justify-content-between align-items-center">
             <div class="d-flex align-items-center mb-2 mb-lg-0">
@@ -37,15 +37,15 @@
         </div>
     </header>
 
-    <div style="overflow: hidden; height: 77vh;">
-        <iframe title="hv_20250521"
-            style="transform: scale(0.8); transform-origin: top left; width: 125%; height: 125%; border: none;"
-            width="95%" height="100%"
-            src="https://app.powerbi.com/reportEmbed?reportId=137ee115-6a33-48d3-9b12-23d1cadda317&autoAuth=true&ctid=899789dc-202f-44b4-8472-a6d40f9eb440&filterPaneEnabled=false"
-            frameborder="1" allowFullScreen="true"></iframe>
+
+    <div style="flex:1">
+        <iframe title="hv_20250521" style="width: 100%; height: 96%; border: none;"
+            src="https://app.powerbi.com/reportEmbed?reportId=0b273a3f-8c64-486a-8703-e47b82047db0&autoAuth=true&ctid=f6b70109-829a-4b17-8175-d2d9568b3541&filterPaneEnabled=false&navContentPaneEnabled=true"
+            frameborder="0" allowFullScreen="true">
+        </iframe 
     </div>
 
-    <footer class="text-center py-3 mt-5 border-top bg-light">
+    <footer class="text-center py-3 mt-5 border-top bg-light fixed-bottom">
         <small>&copy; 2025 Universidad Internacional de La Rioja (UNIR). Todos los derechos reservados.</small>
     </footer>
 

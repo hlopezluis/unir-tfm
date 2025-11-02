@@ -1,4 +1,4 @@
-const pageSize = 10;
+const pageSize = 20;
 let currentPage = 1;
 let totalPages = 1;
 
