@@ -4,6 +4,15 @@ import numpy as np
 import json
 from pymongo import MongoClient
 
+client = None
+
+def get_client():
+    global client
+    if client is None:
+        client = MongoClient(os.environ.get("ATLAS_URI"))
+    return client
+
+
 def lambda_handler(event, context):  
     try:
         print("Evento recibido:", event)
@@ -25,7 +34,8 @@ def lambda_handler(event, context):
 
         client = MongoClient(host=os.environ.get("ATLAS_URI"))
 
-        db = client.tfm
+        db = get_client().tfm
+
         collection = db.raecmbd
 
         total = collection.count_documents(mongo_query)
