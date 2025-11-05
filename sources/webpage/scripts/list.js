@@ -18,9 +18,7 @@ async function fetchData(page) {
 
         console.log(api);
 
-        const response = await fetch(api);            
-        //const text = await response.text();
-        //const result = JSON.parse(text);
+        const response = await fetch(api);      
         const result = await response.json();
 
         console.log(result);
