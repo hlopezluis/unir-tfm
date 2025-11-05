@@ -39,7 +39,8 @@ def lambda_handler(event, context):
         # Renombrar columnas
         df = df.rename(columns={'Número de registro anual': 'numRegistro', 'Comunidad Autónoma': 'comunidadAutonoma', 'Edad': 'edad', 
                                 'Sexo': 'sexo', 'País Nacimiento': 'paisNacimiento', 'Tipo Alta': 'tipoAlta',
-                                'Ingreso en UCI': 'ingresoUCI', 'Días UCI': 'diasUCI', 'Estancia Días': 'estanciaDias'})
+                                'Ingreso en UCI': 'ingresoUCI', 'Días UCI': 'diasUCI', 'Estancia Días': 'estanciaDias',
+                                'Diagnóstico Principal': 'Diagnóstico 1'})
 
         # Eliminamos los registros cuyo número de registro ya esté en la colección
         batch_size = 1000
